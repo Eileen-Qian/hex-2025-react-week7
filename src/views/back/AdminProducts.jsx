@@ -110,7 +110,7 @@ function AdminProducts() {
   };
 
   const logout = async () => {
-    axios.post(`${API_BASE}/logout`);
+    await axios.post(`${API_BASE}/logout`);
     document.cookie = "hexW2Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/hex-2025-react-week7;";
     navigate('/login');
   }

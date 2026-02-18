@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios";
 import { useForm } from "react-hook-form";
@@ -24,6 +24,18 @@ function Login() {
   const [isLoading, setIsLoading] = useState(null);
   const [loginMessage, setLoginMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+
+  useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        await axios.post(`${API_BASE}/api/user/check`);
+        navigate("/admin");
+      } catch (error) {
+        console.error(error.response.data.message);
+      }
+    };
+    checkLogin();
+  }, [navigate]);
 
   const onSubmit = async (formData) => {
     setIsLoading(true);
