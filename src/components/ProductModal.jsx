@@ -180,7 +180,7 @@ function ProductModal({ getProducts, modalType, templateProduct, closeModal }) {
         formData,
       );
       setImageUrl(res.data.imageUrl);
-      dispatch(createAsyncMessage(res.data));
+      dispatch(createAsyncMessage({ ...res.data, message: "上傳成功" }));
     } catch (error) {
       dispatch(createAsyncMessage(error.response.data));
     }
