@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { createAsyncMessage } from "../slices/messageSlice";
 const API_BASE = import.meta.env.VITE_API_BASE;
 const API_PATH = import.meta.env.VITE_API_PATH;
 
 function ProductModal({ getProducts, modalType, templateProduct, closeModal }) {
   const [tempData, setTempData] = useState(templateProduct);
+  const dispatch = useDispatch();
     // 使用 useMemo 計算新資料，避免每次渲染都創建新物件
   const computedData = useMemo(() => {
     const src = templateProduct || {};
@@ -140,11 +143,11 @@ function ProductModal({ getProducts, modalType, templateProduct, closeModal }) {
 
     try {
       const res = await axios[method](url, productData);
-      showAlert("success", res.data.message);
+      dispatch(createAsyncMessage(res.data));
       getProducts();
       closeModal();
     } catch (error) {
-      showAlert("danger", error.response?.data?.message || error.message);
+      dispatch(createAsyncMessage(error.response.data));
     }
   };
 
@@ -153,11 +156,12 @@ function ProductModal({ getProducts, modalType, templateProduct, closeModal }) {
       const res = await axios.delete(
         `${API_BASE}/api/${API_PATH}/admin/product/${id}`,
       );
-      showAlert("success", res.data.message);
+      dispatch(createAsyncMessage(res.data));
       getProducts();
       closeModal();
     } catch (error) {
       showAlert("danger", error.response?.data?.message || error.message);
+      dispatch(createAsyncMessage(error.response.data));
     }
   };
 
@@ -176,8 +180,9 @@ function ProductModal({ getProducts, modalType, templateProduct, closeModal }) {
         formData,
       );
       setImageUrl(res.data.imageUrl);
+      dispatch(createAsyncMessage(res.data));
     } catch (error) {
-      console.error(error);
+      dispatch(createAsyncMessage(error.response.data));
     }
   };
 

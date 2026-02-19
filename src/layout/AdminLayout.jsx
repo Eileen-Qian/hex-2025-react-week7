@@ -1,5 +1,9 @@
-import { useState } from "react";
-import { Outlet, NavLink } from "react-router";
+import { useEffect, useState } from "react";
+import { Outlet, NavLink, useNavigate } from "react-router";
+
+import axios from "axios";
+const API_BASE = import.meta.env.VITE_API_BASE;
+const API_PATH = import.meta.env.VITE_API_PATH;
 
 import logo from "../assets/images/BanriLogo 1.svg"
 
@@ -8,6 +12,18 @@ function AdminPayout() {
 
   const toggleMenu = () => setIsOpen((prev) => !prev);
   const closeMenu = () => setIsOpen(false);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        await axios.post(`${API_BASE}/api/user/check`);
+      } catch (error) {
+        console.error(error.response.data.message);
+        navigate("/login");
+      }
+    };
+    checkLogin()
+  }, [navigate])
 
   return (
     <>

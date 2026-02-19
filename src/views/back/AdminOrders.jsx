@@ -25,17 +25,12 @@ function AdminOrders() {
 
   const orderModalRef = useRef(null);
 
-  const getOrders = async (page = 1) => {
-    try {
-      const res = await axios.get(
-        `${API_BASE}/api/${API_PATH}/admin/orders?page=${page}`,
-      );
-      setOrders(res.data.orders);
-      setPagination(res.data.pagination);
-    } catch (error) {
-      console.error(error.response.data.message);
-    }
-  };
+  const fetchOrders = async (page = 1) => {
+    const res = await axios.get(`${API_BASE}/api/${API_PATH}/admin/orders?page=${page}`)
+    setOrders(res.data.orders);
+    setPagination(res.data.pagination);
+    return res.data
+  }
 
   useEffect(() => {
     // 從 Cookie 取得 Token
@@ -46,6 +41,15 @@ function AdminOrders() {
     if (token) {
       axios.defaults.headers.common["Authorization"] = token;
     }
+
+    const init = async () => {
+      try {
+        await fetchOrders();
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    init();
 
     orderModalRef.current = new bootstrap.Modal("#orderModal", {
       keyboard: false,
@@ -58,18 +62,6 @@ function AdminOrders() {
           document.activeElement.blur();
         }
       });
-
-    const checkLogin = async () => {
-      try {
-        await axios.post(`${API_BASE}/api/user/check`);
-        getOrders();
-      } catch (error) {
-        console.error(error.response.data.message);
-        navigate("/login");
-      }
-    };
-
-    checkLogin();
   }, [navigate]);
 
   const openModal = (type, order) => {
@@ -171,13 +163,13 @@ function AdminOrders() {
         </div>
       </div>
 
-      <Pagination pagination={pagination} onChangePage={getOrders} />
+      <Pagination pagination={pagination} onChangePage={fetchOrders} />
 
       <OrderModal
         modalType={modalType}
         tempOrder={tempOrder}
         closeModal={closeModal}
-        getOrders={getOrders}
+        fetchOrders={fetchOrders}
       />
     </>
   );

@@ -5,8 +5,11 @@ const API_BASE = import.meta.env.VITE_API_BASE;
 const API_PATH = import.meta.env.VITE_API_PATH;
 
 import { currency } from "../utils/currency";
+import { useDispatch } from "react-redux";
+import { createAsyncMessage } from "../slices/messageSlice";
 
-function OrderModal({ modalType, tempOrder, closeModal, getOrders }) {
+function OrderModal({ modalType, tempOrder, closeModal, fetchOrders }) {
+  const dispatch = useDispatch();
   const [isPaid, setIsPaid] = useState(false);
 
   useEffect(() => {
@@ -28,7 +31,7 @@ function OrderModal({ modalType, tempOrder, closeModal, getOrders }) {
 
   const updateOrder = async () => {
     try {
-      await axios.put(
+      const res = await axios.put(
         `${API_BASE}/api/${API_PATH}/admin/order/${tempOrder.id}`,
         {
           data: {
@@ -37,22 +40,25 @@ function OrderModal({ modalType, tempOrder, closeModal, getOrders }) {
           },
         },
       );
-      getOrders();
+      fetchOrders();
       closeModal();
+      dispatch(createAsyncMessage(res.data));
     } catch (error) {
       alert(error.response?.data?.message || "更新失敗");
+      dispatch(createAsyncMessage(error.response.data));
     }
   };
 
   const deleteOrder = async () => {
     try {
-      await axios.delete(
+      const res = await axios.delete(
         `${API_BASE}/api/${API_PATH}/admin/order/${tempOrder.id}`,
       );
-      getOrders();
+      fetchOrders();
       closeModal();
+      dispatch(createAsyncMessage(res.data));
     } catch (error) {
-      alert(error.response?.data?.message || "刪除失敗");
+      dispatch(createAsyncMessage(error.response.data));
     }
   };
 
@@ -228,6 +234,7 @@ function OrderModal({ modalType, tempOrder, closeModal, getOrders }) {
               <>
                 <button
                   type="button"
+
                   className="btn btn-outline-secondary"
                   data-bs-dismiss="modal"
                 >

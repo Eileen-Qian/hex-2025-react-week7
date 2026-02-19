@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { Oval } from "react-loader-spinner";
 import { NavLink } from "react-router";
 import { currency } from "../../utils/currency";
+import { useDispatch } from "react-redux";
+import { createAsyncMessage } from "../../slices/messageSlice";
 
 
 const fetchCart = async () => {
@@ -16,6 +18,7 @@ const fetchCart = async () => {
 function Cart() {
   const [cart, setCart] = useState(null);
   const [loadingCartId, setLoadingCartId] = useState(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const init = async () => {
@@ -41,12 +44,13 @@ function Cart() {
   const updateCartItem = async (cartId, productId, qty) => {
     setLoadingCartId(cartId);
     try {
-      await axios.put(`${API_BASE}/api/${API_PATH}/cart/${cartId}`, {
+      const res = await axios.put(`${API_BASE}/api/${API_PATH}/cart/${cartId}`, {
         data: { product_id: productId, qty },
       });
       getCart();
+      dispatch(createAsyncMessage(res.data));
     } catch (error) {
-      console.error(error);
+      dispatch(createAsyncMessage(error.response.data));
     } finally {
       setLoadingCartId(null);
     }
@@ -55,10 +59,11 @@ function Cart() {
   const removeCartItem = async (cartId) => {
     setLoadingCartId(cartId);
     try {
-      await axios.delete(`${API_BASE}/api/${API_PATH}/cart/${cartId}`);
+      const res = await axios.delete(`${API_BASE}/api/${API_PATH}/cart/${cartId}`);
       getCart();
+      dispatch(createAsyncMessage(res.data));
     } catch (error) {
-      console.error(error);
+      dispatch(createAsyncMessage(error.response.data));
     } finally {
       setLoadingCartId(null);
     }

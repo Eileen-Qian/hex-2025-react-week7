@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 import Pagination from "../..//components/Pagination.jsx";
+import { useDispatch } from "react-redux";
+import { createAsyncMessage } from "../../slices/messageSlice.js";
 
 // 純 API 呼叫，不含 setState，放在元件外部
 const fetchProducts = async (page = 1, category = "") => {
@@ -30,6 +32,7 @@ function Products() {
   });
   const [categories, setCategories] = useState([]);
   const [currentCategory, setCurrentCategory] = useState("");
+  const dispatch = useDispatch();
 
   // useEffect 內部定義完整的 async 函式，避免 cascading renders
   useEffect(() => {
@@ -56,7 +59,7 @@ function Products() {
       setProducts(data.products);
       setPagination(data.pagination);
     } catch (error) {
-      console.error(error);
+      dispatch(createAsyncMessage(error.response.data));
     }
   };
 
@@ -78,9 +81,10 @@ function Products() {
     try {
       const url = `${API_BASE}/api/${API_PATH}/cart`;
       const res = await axios.post(url, { data });
-      alert(res.data.message);
+      dispatch(createAsyncMessage(res.data));
     } catch (error) {
       console.error(error);
+      dispatch(createAsyncMessage(error.response.data));
     }
   };
 

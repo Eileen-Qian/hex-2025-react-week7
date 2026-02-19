@@ -5,11 +5,14 @@ import { useForm } from "react-hook-form";
 import { ThreeDots } from "react-loader-spinner";
 
 import { emailValidatoin, passwordValidation } from "../../utils/validation";
+import { useDispatch } from "react-redux";
+import { createAsyncMessage } from "../../slices/messageSlice";
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
 function Login() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
@@ -22,8 +25,6 @@ function Login() {
     },
   });
   const [isLoading, setIsLoading] = useState(null);
-  const [loginMessage, setLoginMessage] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false);
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -44,18 +45,15 @@ function Login() {
       const { token, expired } = res.data;
       document.cookie = `hexW2Token=${token}; expires=${new Date(expired)}; path=/hex-2025-react-week7;`;
       axios.defaults.headers.common["Authorization"] = token;
-      setIsSuccess(true);
-      setLoginMessage("登入成功");
       setTimeout(() => {
         navigate("/admin");
       }, 500);
+      dispatch(createAsyncMessage(res.data));
     } catch (error) {
       console.error(error);
-      setIsSuccess(false);
-      setLoginMessage(error?.response.data?.message);
+      dispatch(createAsyncMessage(error.response.data));
     } finally {
       setTimeout(() => {
-        setLoginMessage("");
         setIsLoading(false);
       }, 1000);
     }
@@ -125,14 +123,6 @@ function Login() {
                 )}
               </button>
             </form>
-            {loginMessage && (
-              <p
-                className={`h3 mt-3
-                  ${isSuccess ? "text-success" : "text-danger"}`}
-              >
-                {loginMessage}
-              </p>
-            )}
           </div>
         </div>
         <p className="mt-5 mb-3 text-muted">&copy; 2024~∞ - 六角學院</p>

@@ -8,6 +8,8 @@ import { useForm } from "react-hook-form";
 import { ThreeDots } from "react-loader-spinner";
 import { emailValidatoin, taiwanPhoneValidation } from "../../utils/validation";
 import { currency } from "../../utils/currency";
+import { useDispatch } from "react-redux";
+import { createAsyncMessage } from "../../slices/messageSlice";
 
 const fetchCart = async () => {
   const res = await axios.get(`${API_BASE}/api/${API_PATH}/cart`);
@@ -18,6 +20,7 @@ function CheckOut() {
   const navigate = useNavigate();
   const [cart, setCart] = useState(null);
   const [isChecking, setIsChecking] = useState(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const init = async () => {
@@ -57,11 +60,11 @@ function CheckOut() {
         data,
       });
       fetchCart();
-      alert(res.data.message);
-    } catch (error) {
-      console.error(error);
-    } finally {
+      dispatch(createAsyncMessage(res.data));
       navigate("/products");
+    } catch (error) {
+      dispatch(createAsyncMessage(error.response.data));
+    } finally {
       setIsChecking(null);
     }
   };

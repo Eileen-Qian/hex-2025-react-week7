@@ -3,13 +3,16 @@ const API_BASE = import.meta.env.VITE_API_BASE;
 const API_PATH = import.meta.env.VITE_API_PATH;
 
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useParams } from "react-router";
+import { createAsyncMessage } from "../../slices/messageSlice";
 
 function SingleProduct() {
   const [product, setProduct] = useState(null);
   const [mainImage, setMainImage] = useState("");
   const [qty, setQty] = useState(1);
   const { id } = useParams();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const getProduct = async () => {
@@ -21,10 +24,11 @@ function SingleProduct() {
         setMainImage(res.data.product.imageUrl);
       } catch (error) {
         console.error(error);
+        dispatch(createAsyncMessage(error.response.data));
       }
     };
     getProduct();
-  }, [id]);
+  }, [dispatch, id]);
 
   const addCart = async (id, qty = 1) => {
     const data = {
@@ -34,9 +38,9 @@ function SingleProduct() {
     try {
       const url = `${API_BASE}/api/${API_PATH}/cart`;
       const res = await axios.post(url, { data });
-      alert(res.data.message);
+      dispatch(createAsyncMessage(res.data));
     } catch (error) {
-      console.error(error);
+      dispatch(createAsyncMessage(error.response.data));
     }
   };
 

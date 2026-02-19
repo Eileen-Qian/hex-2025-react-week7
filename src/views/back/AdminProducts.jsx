@@ -25,7 +25,7 @@ const INITIAL_TEMPLATE_DATA = {
   is_enabled: false,
   imageUrl: "",
   imagesUrl: [],
-  shipping: []
+  shipping: [],
 };
 
 function AdminProducts() {
@@ -41,16 +41,13 @@ function AdminProducts() {
     has_next: false,
   });
 
-  const getProducts = async (page = 1) => {
-    try {
-      const res = await axios.get(
-        `${API_BASE}/api/${API_PATH}/admin/products?page=${page}`,
-      );
-      setProducts(res.data.products);
-      setPagination(res.data.pagination);
-    } catch (error) {
-      console.error(error.response.data.message);
-    }
+  const fetchProducts = async (page = 1) => {
+    const res = await axios.get(
+      `${API_BASE}/api/${API_PATH}/admin/products?page=${page}`,
+    );
+    setProducts(res.data.products);
+    setPagination(res.data.pagination);
+    return res.data;
   };
 
   const productModalRef = useRef(null);
@@ -77,32 +74,31 @@ function AdminProducts() {
           document.activeElement.blur();
         }
       });
+  }, [navigate]);
 
-    const checkLogin = async () => {
+  useEffect(() => {
+    const init = async () => {
       try {
-        await axios.post(`${API_BASE}/api/user/check`);
-        getProducts();
+        await fetchProducts();
       } catch (error) {
-        console.error(error.response.data.message);
-        navigate("/login");
+        console.error(error);
       }
     };
-
-    checkLogin();
-  }, [navigate]);
+    init();
+  }, []);
 
   const openModal = (type, product) => {
     setModalType(type);
     // 不要每次都解構重建，直接傳遞
-  if (type === "create") {
-    setTemplateProduct(INITIAL_TEMPLATE_DATA);
-  } else {
-    setTemplateProduct(product);
-  }
-  // 延遲開啟 modal，確保 state 更新完成
-  setTimeout(() => {
-    productModalRef.current.show();
-  }, 0);
+    if (type === "create") {
+      setTemplateProduct(INITIAL_TEMPLATE_DATA);
+    } else {
+      setTemplateProduct(product);
+    }
+    // 延遲開啟 modal，確保 state 更新完成
+    setTimeout(() => {
+      productModalRef.current.show();
+    }, 0);
   };
 
   const closeModal = () => {
@@ -111,26 +107,24 @@ function AdminProducts() {
 
   const logout = async () => {
     await axios.post(`${API_BASE}/logout`);
-    document.cookie = "hexW2Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/hex-2025-react-week7;";
-    navigate('/login');
-  }
+    document.cookie =
+      "hexW2Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/hex-2025-react-week7;";
+    navigate("/login");
+  };
 
   return (
     <>
       <div className="container">
         <div className="mt-4 d-flex justify-content-between">
           <button
-          className="btn btn-outline-primary"
-          onClick={() => navigate("/")}
-        >
-          回前台
+            className="btn btn-outline-primary"
+            onClick={() => navigate("/")}
+          >
+            回前台
           </button>
-          <button
-          className="btn btn-outline-primary"
-          onClick={() => logout()}
-        >
-          登出
-        </button>
+          <button className="btn btn-outline-primary" onClick={() => logout()}>
+            登出
+          </button>
         </div>
         <div className="text-end mt-4">
           <button
@@ -157,12 +151,8 @@ function AdminProducts() {
               <tr key={product.id}>
                 <td>{product.category}</td>
                 <td>{product.title}</td>
-                <td>
-                  {currency(product.origin_price)}
-                </td>
-                <td>
-                  {currency(product.price)}
-                </td>
+                <td>{currency(product.origin_price)}</td>
+                <td>{currency(product.price)}</td>
                 <td className={product.is_enabled ? "text-success" : ""}>
                   {product.is_enabled ? "啟用" : "未啟用"}
                 </td>
@@ -194,10 +184,10 @@ function AdminProducts() {
         </table>
       </div>
 
-      <Pagination pagination={pagination} onChangePage={getProducts} />
+      <Pagination pagination={pagination} onChangePage={fetchProducts} />
 
       <ProductModal
-        getProducts={getProducts}
+        getProducts={fetchProducts}
         modalType={modalType}
         templateProduct={templateProduct}
         closeModal={closeModal}
