@@ -2,6 +2,7 @@ import axios from "axios";
 const API_BASE = import.meta.env.VITE_API_BASE;
 const API_PATH = import.meta.env.VITE_API_PATH;
 
+import { currency } from "../../utils/currency";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useParams } from "react-router";
@@ -91,10 +92,10 @@ function SingleProduct() {
           <p>{product.description}</p>
           <div className="mb-3">
             {product.origin_price !== product.price && (
-              <del className="text-muted me-2">NT$ {product.origin_price}</del>
+              <del className="text-muted me-2">NT$ {currency(product.origin_price)}</del>
             )}
             <span className="fs-4 fw-bold text-danger">
-              NT$ {product.price}
+              NT$ {currency(product.price)}
             </span>
             <small className="text-muted ms-2">/ {product.unit}</small>
           </div>
