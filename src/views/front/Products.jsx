@@ -6,8 +6,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 import Pagination from "../..//components/Pagination.jsx";
-import { useDispatch } from "react-redux";
-import { createAsyncMessage } from "../../slices/messageSlice.js";
+import useMessage from "../../hooks/useMessage.jsx";
 
 // 純 API 呼叫，不含 setState，放在元件外部
 const fetchProducts = async (page = 1, category = "") => {
@@ -32,7 +31,7 @@ function Products() {
   });
   const [categories, setCategories] = useState([]);
   const [currentCategory, setCurrentCategory] = useState("");
-  const dispatch = useDispatch();
+  const { showSuccess, showError } = useMessage();
 
   // useEffect 內部定義完整的 async 函式，避免 cascading renders
   useEffect(() => {
@@ -46,11 +45,11 @@ function Products() {
         setPagination(productData.pagination);
         setCategories(categoryList);
       } catch (error) {
-        console.error(error);
+        showError(error.response.data.message);
       }
     };
     init();
-  }, []);
+  }, [showError]);
 
   // 給 Pagination 和其他事件使用的函式
   const getProducts = async (page = 1, category = currentCategory) => {
@@ -59,7 +58,7 @@ function Products() {
       setProducts(data.products);
       setPagination(data.pagination);
     } catch (error) {
-      dispatch(createAsyncMessage(error.response.data));
+      console.error(error.response);
     }
   };
 
@@ -81,10 +80,9 @@ function Products() {
     try {
       const url = `${API_BASE}/api/${API_PATH}/cart`;
       const res = await axios.post(url, { data });
-      dispatch(createAsyncMessage(res.data));
+      showSuccess(res.data.message);
     } catch (error) {
-      console.error(error);
-      dispatch(createAsyncMessage(error.response.data));
+      showError(error.response.data.message);
     }
   };
 
@@ -144,7 +142,10 @@ function Products() {
             </div>
           </div>
         ))}
-        <Pagination pagination={pagination} onChangePage={(page) => getProducts(page)} />
+        <Pagination
+          pagination={pagination}
+          onChangePage={(page) => getProducts(page)}
+        />
       </div>
     </div>
   );

@@ -8,8 +8,7 @@ import { useForm } from "react-hook-form";
 import { ThreeDots } from "react-loader-spinner";
 import { emailValidatoin, taiwanPhoneValidation } from "../../utils/validation";
 import { currency } from "../../utils/currency";
-import { useDispatch } from "react-redux";
-import { createAsyncMessage } from "../../slices/messageSlice";
+import useMessage from "../../hooks/useMessage";
 
 const fetchCart = async () => {
   const res = await axios.get(`${API_BASE}/api/${API_PATH}/cart`);
@@ -20,7 +19,7 @@ function CheckOut() {
   const navigate = useNavigate();
   const [cart, setCart] = useState(null);
   const [isChecking, setIsChecking] = useState(null);
-  const dispatch = useDispatch();
+  const { showSuccess, showError } = useMessage();
 
   useEffect(() => {
     const init = async () => {
@@ -28,11 +27,11 @@ function CheckOut() {
         const data = await fetchCart();
         setCart(data);
       } catch (error) {
-        console.error(error);
+        showError(error.response.data.message);
       }
     };
     init();
-  }, []);
+  }, [showError]);
 
   const {
     register,
@@ -60,16 +59,14 @@ function CheckOut() {
         data,
       });
       fetchCart();
-      dispatch(createAsyncMessage(res.data));
+      showSuccess(res.data.message);
       navigate("/products");
     } catch (error) {
-      dispatch(createAsyncMessage(error.response.data));
+      showError(error.response.data.message);
     } finally {
       setIsChecking(null);
     }
   };
-
-
 
   if (!cart) return <p className="text-center fs-2 mt-5">載入中...</p>;
 

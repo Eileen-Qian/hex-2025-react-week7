@@ -12,6 +12,7 @@ const API_PATH = import.meta.env.VITE_API_PATH;
 import ProductModal from "../../components/ProductModal";
 import Pagination from "../../components/Pagination";
 import { currency } from "../../utils/currency";
+import useMessage from "../../hooks/useMessage";
 
 const INITIAL_TEMPLATE_DATA = {
   id: "",
@@ -40,6 +41,7 @@ function AdminProducts() {
     has_pre: false,
     has_next: false,
   });
+  const { showError } = useMessage();
 
   const fetchProducts = async (page = 1) => {
     const res = await axios.get(
@@ -81,11 +83,11 @@ function AdminProducts() {
       try {
         await fetchProducts();
       } catch (error) {
-        console.error(error);
+        showError(error.response.data.message);
       }
     };
     init();
-  }, []);
+  }, [showError]);
 
   const openModal = (type, product) => {
     setModalType(type);
@@ -105,27 +107,9 @@ function AdminProducts() {
     productModalRef.current.hide();
   };
 
-  const logout = async () => {
-    await axios.post(`${API_BASE}/logout`);
-    document.cookie =
-      "hexW2Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/hex-2025-react-week7;";
-    navigate("/login");
-  };
-
   return (
     <>
       <div className="container">
-        <div className="mt-4 d-flex justify-content-between">
-          <button
-            className="btn btn-outline-primary"
-            onClick={() => navigate("/")}
-          >
-            回前台
-          </button>
-          <button className="btn btn-outline-primary" onClick={() => logout()}>
-            登出
-          </button>
-        </div>
         <div className="text-end mt-4">
           <button
             className="btn btn-primary"

@@ -6,9 +6,7 @@ import { useEffect, useState } from "react";
 import { Oval } from "react-loader-spinner";
 import { NavLink } from "react-router";
 import { currency } from "../../utils/currency";
-import { useDispatch } from "react-redux";
-import { createAsyncMessage } from "../../slices/messageSlice";
-
+import useMessage from "../../hooks/useMessage.jsx";
 
 const fetchCart = async () => {
   const res = await axios.get(`${API_BASE}/api/${API_PATH}/cart`);
@@ -18,7 +16,7 @@ const fetchCart = async () => {
 function Cart() {
   const [cart, setCart] = useState(null);
   const [loadingCartId, setLoadingCartId] = useState(null);
-  const dispatch = useDispatch();
+  const { showSuccess, showError } = useMessage();
 
   useEffect(() => {
     const init = async () => {
@@ -27,10 +25,11 @@ function Cart() {
         setCart(data);
       } catch (error) {
         console.error(error);
+        showError(error.response.data.message);
       }
     };
     init();
-  }, []);
+  }, [showError]);
 
   const getCart = async () => {
     try {
@@ -44,13 +43,16 @@ function Cart() {
   const updateCartItem = async (cartId, productId, qty) => {
     setLoadingCartId(cartId);
     try {
-      const res = await axios.put(`${API_BASE}/api/${API_PATH}/cart/${cartId}`, {
-        data: { product_id: productId, qty },
-      });
+      const res = await axios.put(
+        `${API_BASE}/apis/${API_PATH}/cart/${cartId}`,
+        {
+          data: { product_id: productId, qty },
+        },
+      );
       getCart();
-      dispatch(createAsyncMessage(res.data));
+      showSuccess(res.data.message);
     } catch (error) {
-      dispatch(createAsyncMessage(error.response.data));
+      showError(error.response.data.message);
     } finally {
       setLoadingCartId(null);
     }
@@ -59,11 +61,13 @@ function Cart() {
   const removeCartItem = async (cartId) => {
     setLoadingCartId(cartId);
     try {
-      const res = await axios.delete(`${API_BASE}/api/${API_PATH}/cart/${cartId}`);
+      const res = await axios.delete(
+        `${API_BASE}/api/${API_PATH}/cart/${cartId}`,
+      );
       getCart();
-      dispatch(createAsyncMessage(res.data));
+      showSuccess(res.data.message);
     } catch (error) {
-      dispatch(createAsyncMessage(error.response.data));
+      showError(error.response.data.message);
     } finally {
       setLoadingCartId(null);
     }

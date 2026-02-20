@@ -5,17 +5,16 @@ const API_BASE = import.meta.env.VITE_API_BASE;
 const API_PATH = import.meta.env.VITE_API_PATH;
 
 import { currency } from "../utils/currency";
-import { useDispatch } from "react-redux";
-import { createAsyncMessage } from "../slices/messageSlice";
+import useMessage from "../hooks/useMessage";
 
 function OrderModal({ modalType, tempOrder, closeModal, fetchOrders }) {
-  const dispatch = useDispatch();
+  const { showSuccess, showError } = useMessage();
   const [isPaid, setIsPaid] = useState(false);
 
   useEffect(() => {
     const setPaymentStatus = () => {
-      setIsPaid(!!tempOrder.is_paid)
-    }
+      setIsPaid(!!tempOrder.is_paid);
+    };
     setPaymentStatus();
   }, [tempOrder]);
 
@@ -42,10 +41,9 @@ function OrderModal({ modalType, tempOrder, closeModal, fetchOrders }) {
       );
       fetchOrders();
       closeModal();
-      dispatch(createAsyncMessage(res.data));
+      showSuccess(res.data.message);
     } catch (error) {
-      alert(error.response?.data?.message || "更新失敗");
-      dispatch(createAsyncMessage(error.response.data));
+      showError(error.response.data.message);
     }
   };
 
@@ -56,15 +54,13 @@ function OrderModal({ modalType, tempOrder, closeModal, fetchOrders }) {
       );
       fetchOrders();
       closeModal();
-      dispatch(createAsyncMessage(res.data));
+      showSuccess(res.data.message);
     } catch (error) {
-      dispatch(createAsyncMessage(error.response.data));
+      showError(error.response.data.message);
     }
   };
 
-  const products = tempOrder.products
-    ? Object.values(tempOrder.products)
-    : [];
+  const products = tempOrder.products ? Object.values(tempOrder.products) : [];
 
   return (
     <div
@@ -108,13 +104,18 @@ function OrderModal({ modalType, tempOrder, closeModal, fetchOrders }) {
                         <td className="text-muted" style={{ width: "120px" }}>
                           訂單編號
                         </td>
-                        <td className="text-start" style={{ wordBreak: "break-all" }}>
+                        <td
+                          className="text-start"
+                          style={{ wordBreak: "break-all" }}
+                        >
                           {tempOrder.id}
                         </td>
                       </tr>
                       <tr>
                         <td className="text-muted">建立時間</td>
-                        <td className="text-start">{formatDate(tempOrder.create_at)}</td>
+                        <td className="text-start">
+                          {formatDate(tempOrder.create_at)}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -140,7 +141,9 @@ function OrderModal({ modalType, tempOrder, closeModal, fetchOrders }) {
                       </tr>
                       <tr>
                         <td className="text-muted">地址</td>
-                        <td className="text-start">{tempOrder.user?.address}</td>
+                        <td className="text-start">
+                          {tempOrder.user?.address}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -234,7 +237,6 @@ function OrderModal({ modalType, tempOrder, closeModal, fetchOrders }) {
               <>
                 <button
                   type="button"
-
                   className="btn btn-outline-secondary"
                   data-bs-dismiss="modal"
                 >

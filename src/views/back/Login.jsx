@@ -5,14 +5,13 @@ import { useForm } from "react-hook-form";
 import { ThreeDots } from "react-loader-spinner";
 
 import { emailValidatoin, passwordValidation } from "../../utils/validation";
-import { useDispatch } from "react-redux";
-import { createAsyncMessage } from "../../slices/messageSlice";
+import useMessage from "../../hooks/useMessage";
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
 function Login() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const { showSuccess, showError } = useMessage();
   const {
     register,
     handleSubmit,
@@ -48,10 +47,9 @@ function Login() {
       setTimeout(() => {
         navigate("/admin");
       }, 500);
-      dispatch(createAsyncMessage(res.data));
+      showSuccess(res.data.message);
     } catch (error) {
-      console.error(error);
-      dispatch(createAsyncMessage(error.response.data));
+      showError(error.response.data.message);
     } finally {
       setTimeout(() => {
         setIsLoading(false);

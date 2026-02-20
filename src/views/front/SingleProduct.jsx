@@ -4,16 +4,15 @@ const API_PATH = import.meta.env.VITE_API_PATH;
 
 import { currency } from "../../utils/currency";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import { useParams } from "react-router";
-import { createAsyncMessage } from "../../slices/messageSlice";
+import useMessage from "../../hooks/useMessage.jsx";
 
 function SingleProduct() {
   const [product, setProduct] = useState(null);
   const [mainImage, setMainImage] = useState("");
   const [qty, setQty] = useState(1);
   const { id } = useParams();
-  const dispatch = useDispatch();
+  const { showSuccess, showError } = useMessage();
 
   useEffect(() => {
     const getProduct = async () => {
@@ -25,11 +24,11 @@ function SingleProduct() {
         setMainImage(res.data.product.imageUrl);
       } catch (error) {
         console.error(error);
-        dispatch(createAsyncMessage(error.response.data));
+        showError(error.response.data.message);
       }
     };
     getProduct();
-  }, [dispatch, id]);
+  }, [id, showSuccess, showError]);
 
   const addCart = async (id, qty = 1) => {
     const data = {
@@ -39,9 +38,9 @@ function SingleProduct() {
     try {
       const url = `${API_BASE}/api/${API_PATH}/cart`;
       const res = await axios.post(url, { data });
-      dispatch(createAsyncMessage(res.data));
+      showSuccess(res.data.message);
     } catch (error) {
-      dispatch(createAsyncMessage(error.response.data));
+      showError(error.response.data.message);
     }
   };
 
@@ -92,7 +91,9 @@ function SingleProduct() {
           <p>{product.description}</p>
           <div className="mb-3">
             {product.origin_price !== product.price && (
-              <del className="text-muted me-2">NT$ {currency(product.origin_price)}</del>
+              <del className="text-muted me-2">
+                NT$ {currency(product.origin_price)}
+              </del>
             )}
             <span className="fs-4 fw-bold text-danger">
               NT$ {currency(product.price)}

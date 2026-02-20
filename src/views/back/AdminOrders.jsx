@@ -26,11 +26,13 @@ function AdminOrders() {
   const orderModalRef = useRef(null);
 
   const fetchOrders = async (page = 1) => {
-    const res = await axios.get(`${API_BASE}/api/${API_PATH}/admin/orders?page=${page}`)
+    const res = await axios.get(
+      `${API_BASE}/api/${API_PATH}/admin/orders?page=${page}`,
+    );
     setOrders(res.data.orders);
     setPagination(res.data.pagination);
-    return res.data
-  }
+    return res.data;
+  };
 
   useEffect(() => {
     // 從 Cookie 取得 Token
@@ -76,13 +78,6 @@ function AdminOrders() {
     orderModalRef.current.hide();
   };
 
-  const logout = async () => {
-    await axios.post(`${API_BASE}/logout`);
-    document.cookie =
-      "hexW2Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/hex-2025-react-week7;";
-    navigate("/login");
-  };
-
   const formatDate = (timestamp) => {
     if (!timestamp) return "-";
     const date = new Date(timestamp * 1000);
@@ -96,17 +91,6 @@ function AdminOrders() {
   return (
     <>
       <div className="container">
-        <div className="mt-4 d-flex justify-content-between">
-          <button
-            className="btn btn-outline-primary"
-            onClick={() => navigate("/")}
-          >
-            回前台
-          </button>
-          <button className="btn btn-outline-primary" onClick={() => logout()}>
-            登出
-          </button>
-        </div>
         <h2 className="mt-4">訂單列表</h2>
         <div className="table-responsive">
           <table className="table mt-4 align-middle">
